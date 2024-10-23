@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدخال البيانات</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: green;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkgreen;
+        }
+        .data-container {
+            margin-top: 20px;
+        }
+        .data-item {
+            margin-bottom: 10px;
+            background: #e7f3fe;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .return-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px;
+            background: blue;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .return-link:hover {
+            background: darkblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>إدخال البيانات</h1>
+    
+    <form id="dataForm">
+        <label for="fullName">الاسم الرباعي:</label>
+        <input type="text" id="fullName" name="fullName" required>
+
+        <label for="meterNumber">رقم العداد:</label>
+        <input type="text" id="meterNumber" name="meterNumber" required>
+
+        <label for="region">اسم المنطقة:</label>
+        <input type="text" id="region" name="region" required>
+
+        <label for="chargeValue">قيمة الشحنة:</label>
+        <input type="number" id="chargeValue" name="chargeValue" required>
+
+        <button type="submit">إرسال البيانات</button>
+    </form>
+
+    <div class="data-container" id="latestDataContainer"></div>
+    <a href="all-data.html" class="return-link">مشاهدة جميع البيانات المدخلة</a>
+
+    <script>
+        // التحقق من حالة تسجيل الدخول
+        if (!localStorage.getItem('loggedIn')) {
+            alert('يجب تسجيل الدخول أولاً!');
+            window.location.href = 'login.html'; // إذا لم يكن مسجلاً الدخول، يتم توجيه المستخدم إلى صفحة تسجيل الدخول
+        }
+
+        // دالة لإرسال البيانات
+        document.getElementById('dataForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const fullName = document.getElementById('fullName').value;
+            const meterNumber = document.getElementById('meterNumber').value;
+            const region = document.getElementById('region').value;
+            const chargeValue = document.getElementById('chargeValue').value;
+
+            const newEntry = {
+                fullName,
+                meterNumber,
+                region,
+                chargeValue,
+                timestamp: new Date().toISOString()
+            };
+
+            // تخزين البيانات في localStorage
+            const allData = JSON.parse(localStorage.getItem('allFormData')) || [];
+            allData.push(newEntry);
+            localStorage.setItem('allFormData', JSON.stringify(allData));
+
+            // إرسال البيانات إلى السيرفر
+            fetch('http://localhost:3000/send', { // تأكد من أن السيرفر يعمل على هذا الرابط
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newEntry)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('نجاح:', data);
+                displayLatestData();
+                this.reset(); // إعادة تعيين النموذج بعد الإرسال
+            })
+            .catch((error) => {
+                console.error('خطأ:', error);
+            });
+        });
+
+        // دالة لعرض أحدث البيانات المدخلة
+        function displayLatestData() {
+            const allData = JSON.parse(localStorage.getItem('allFormData')) || [];
+            const latestEntry = allData[allData.length - 1]; // الحصول على أحدث إدخال
+
+            const container = document.getElementById('latestDataContainer');
+            if (latestEntry) {
+                container.innerHTML = `
+                    <div class="data-item">
+                        <span>الاسم الرباعي:</span> ${latestEntry.fullName}
+                    </div>
+                    <div class="data-item">
+                        <span>رقم العداد:</span> ${latestEntry.meterNumber}
+                    </div>
+                    <div class="data-item">
+                        <span>اسم المنطقة:</span> ${latestEntry.region}
+                    </div>
+                    <div class="data-item">
+                        <span>قيمة الشحنة:</span> ${latestEntry.chargeValue}
+                    </div>
+                    <div class="data-item">
+                        <span>وقت الإدخال:</span> ${new Date(latestEntry.timestamp).toLocaleString()}
+                    </div>
+                `;
+            } else {
+                container.innerHTML = 'لا توجد بيانات مدخلة.';
+            }
+        }
+
+        // عرض أحدث البيانات عند تحميل الصفحة
+        displayLatestData();
+    </script>
+</body>
+</html>

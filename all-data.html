@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جميع البيانات المدخلة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .data-item {
+            margin-bottom: 10px;
+            background: #e7f3fe;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .return-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px;
+            background: blue;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .return-link:hover {
+            background: darkblue;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: darkred;
+        }
+    </style>
+</head>
+<body>
+    <h1>جميع البيانات المدخلة</h1>
+    <div id="dataContainer"></div>
+    <button id="clearDataButton">مسح جميع البيانات المدخلة</button>
+    <a href="send.html" class="return-link">الرجوع إلى إدخال البيانات</a>
+
+    <script>
+        // دالة لعرض جميع البيانات المدخلة
+        function displayAllData() {
+            const allData = JSON.parse(localStorage.getItem('allFormData')) || [];
+            const container = document.getElementById('dataContainer');
+
+            if (allData.length === 0) {
+                container.innerHTML = '<p>لا توجد بيانات مدخلة.</p>';
+                return;
+            }
+
+            container.innerHTML = allData.map((entry, index) => `
+                <div class="data-item">
+                    <strong>الإدخال ${index + 1}:</strong><br>
+                    <span>الاسم الرباعي: ${entry.fullName}</span><br>
+                    <span>رقم العداد: ${entry.meterNumber}</span><br>
+                    <span>اسم المنطقة: ${entry.region}</span><br>
+                    <span>قيمة الشحنة: ${entry.chargeValue}</span><br>
+                    <span>وقت الإدخال: ${new Date(entry.timestamp).toLocaleString()}</span>
+                </div>
+            `).join('');
+        }
+
+        // دالة لمسح جميع البيانات
+        document.getElementById('clearDataButton').addEventListener('click', function() {
+            if (confirm('هل أنت متأكد من أنك تريد مسح جميع البيانات؟')) {
+                localStorage.removeItem('allFormData');
+                displayAllData(); // تحديث العرض بعد المسح
+            }
+        });
+
+        // عرض جميع البيانات عند تحميل الصفحة
+        displayAllData();
+    </script>
+</body>
+</html>

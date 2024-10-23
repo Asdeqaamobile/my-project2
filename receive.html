@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جميع البيانات المدخلة</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .data-item {
+            margin-bottom: 10px;
+            background: #e7f3fe;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .return-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px;
+            background: blue;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .return-link:hover {
+            background: darkblue;
+        }
+    </style>
+</head>
+<body>
+    <h1>جميع البيانات المدخلة</h1>
+    <div id="allDataContainer"></div>
+    <a href="send.html" class="return-link">العودة إلى صفحة إدخال البيانات</a>
+
+    <script>
+        // دالة لعرض جميع البيانات المدخلة
+        function displayAllData() {
+            const allData = JSON.parse(localStorage.getItem('allFormData')) || [];
+            const container = document.getElementById('allDataContainer');
+            container.innerHTML = '';
+
+            if (allData.length > 0) {
+                allData.forEach(entry => {
+                    container.innerHTML += `
+                        <div class="data-item">
+                            <p><strong>الاسم الرباعي:</strong> ${entry.fullName}</p>
+                            <p><strong>رقم العداد:</strong> ${entry.meterNumber}</p>
+                            <p><strong>اسم المنطقة:</strong> ${entry.region}</p>
+                            <p><strong>قيمة الشحنة:</strong> ${entry.chargeValue}</p>
+                            <p><strong>وقت الإدخال:</strong> ${new Date(entry.timestamp).toLocaleString()}</p>
+                        </div>
+                    `;
+                });
+            } else {
+                container.innerHTML = 'لا توجد بيانات مدخلة.';
+            }
+        }
+
+        // عرض جميع البيانات عند تحميل الصفحة
+        displayAllData();
+    </script>
+</body>
+</html>
